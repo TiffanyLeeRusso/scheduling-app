@@ -1,0 +1,43 @@
+.eventEditor {
+  border: 2px solid #555;
+  padding: 20px;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+#eventEditorForm {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  text-align: center;
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.btn-row {
+  text-align: right;
+  margin-top: 20px;
+}
+
+.btn-row .btn:not(:last-child) {
+  margin-right: 20px;
+}
+
+label {
+  margin-bottom: 20px;
+}
+
+input, textarea, select {
+  padding: 10px;
+  min-width: 300px;
+}
+
+.error {
+  text-align: right;
+}
