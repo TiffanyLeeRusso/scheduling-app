@@ -13,11 +13,20 @@ Tested with MySQL v8.0.36.
 Run the *db.sql* script to create the DB in your SQL server.
 Run the *data.sql* script to add some initial mock data to your DB.
 
+Start the DB service.\
+For MySQL on Windows (ugh, I know), if during install you allowed
+MySQL to run as a Windows service, open a cmd prompt in administrator 
+mode and run (for version 8.0.*):
+
+`$ net run mysql80`
+
+To get the exact name of your service, click the Windows/Start menu and search "Services". A "MySQL#" service should be listed in the Services window.
+
 ### Backend
 
 #### Install Flask
-Use one of the following commands to install Flask if you do not already have it:
-`$ pip install Flask`
+Use one of the following commands to install Flask if you do not already have it: \
+`$ pip install Flask` \
 `$ py -m pip install flask`
 
 #### Start the backend server
@@ -28,9 +37,9 @@ Open a terminal and run the following command. The process will not exit until C
 ### Frontend
 
 #### Install all the things
-You know the drill.
-`$ cd scheduling-app`
-`$ npm install`
+You know the drill.\
+`$ cd scheduling-app`\
+`$ npm install`\
 *sips coffee*
 
 #### Start react-scripts
@@ -40,7 +49,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.
 You may also see any lint errors in the console.
 
-`$ cd scheduling-app`
+`$ cd scheduling-app`\
 `$npm start`
 
 ## Other Scripts
