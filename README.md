@@ -18,7 +18,7 @@ For MySQL on Windows (ugh, I know), if during install you allowed
 MySQL to run as a Windows service, open a cmd prompt in administrator 
 mode and run (for version 8.0.*):
 
-`$ net run mysql80`
+`$ net start mysql80`
 
 To get the exact name of your service, click the Windows/Start menu and search "Services". A "MySQL#" service should be listed in the Services window.
 
