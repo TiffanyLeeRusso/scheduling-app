@@ -27,7 +27,6 @@ Additional Features (TODO):
 
 /*
 Technical TODOs
-Move focus to EventEditor when it opens
 Add a select to show appointments by user (experience: choose a user, filtering events by user)
 Add a select to show appointments by client (experience: choose a client, filtering events by client)
 Add confirmation to delete
@@ -102,7 +101,7 @@ const Scheduler = () => {
       // Events array for the FullCalendar calendar
       // Contains objects with props title, start, end, etc.: https://fullcalendar.io/docs/event-parsing
       let events = []; 
-      for(let ap of appointments) {
+      appointments.forEach((ap) => {
         // Find corresponding data from the other arrays
         let client = clients.find((el) => { return el.id === ap.client_id; }) || {};
         let user = users.find((el) => { return el.id === ap.user_id; }) || {};
@@ -128,7 +127,7 @@ const Scheduler = () => {
             interactive: true,
             editable: true
         });
-      }
+      });
 
       // FullCalendar.io calendar init
       let calendarEl = document.getElementById('calendar');

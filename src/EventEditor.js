@@ -105,19 +105,19 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
       setTitle("Edit Event");
       // Add initial values from the eventData
       let date = "";
-      for(let field of EventTemplate) {
+      EventTemplate.forEach((field) => {
         let val = eventData.appointment[field.name] || "";
         if(field.name === "start_time" || field.name === "end_time") {
           let d = (new Date(val)).toISOString();
           val = d.substring(11,16);
           date = d.substring(0,10);
-        } else if(field.name === "date") {
-          continue;
         } else if(field.name === "services") {
           val = eventData.services.map(service => service.id);
+        } else if(field.name === "date") {
+          return;
         }
         initFormData[field.name] = val;
-      }
+      });
       // bleh. Date is contained in start_time/end_time but the date field is before start & end time..
       initFormData["date"] = date;
     }
@@ -245,11 +245,10 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
     };
   };
 
+
   const renderFormFields = () => {
     let fields = [];
-    for(let field of EventTemplate) {
-      fields.push(renderField(field));
-    }
+    EventTemplate.forEach(field => fields.push(renderField(field)));
     return fields;
   };
 
@@ -257,15 +256,21 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
   useEffect(() => {
     setError("");
     fillForm();
-    document.querySelector(".eventEditor").scrollIntoView();
+    requestAnimationFrame(() => {
+      document.querySelector(".eventEditor")?.scrollIntoView();
+      document.querySelector('form input:not([type=hidden]),select:not([type=hidden]),textarea:not([type=hidden])')?.focus();
+    });
   }, []);
+
 
   // HTML
   return (
     <div className="eventEditor">
       <h2 className="title">{title}</h2>
       <button className="btn btn-secondary close-btn" aria-label="Close" onClick={closeFunc}>X</button>
-      <form id="eventEditorForm">{renderFormFields()}</form>
+      <form id="eventEditorForm">
+        { renderFormFields() }
+      </form>
       { error.length > 0 ? 
         <div className="error">{error}</div>
         :
