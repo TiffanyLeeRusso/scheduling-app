@@ -35,7 +35,7 @@ Add TypeScript?
 Add Redux?
 */
 
-const Scheduler = () => {
+const Scheduler = ({updateUserMessage}) => {
 
   // Variables
   const [users, setUsers] = useState([]);
@@ -206,7 +206,12 @@ const Scheduler = () => {
   return (
     <div className="scheduling">
       <button className="btn btn-primary add-btn" onClick={addEvent}>Add Event</button>
-      { showEditor && <EventEditor eventData={currentEvent || null} generalData={{ users: users, clients: clients, services: services }} closeFunc={closeEventEditor} /> }
+      { showEditor && 
+        <EventEditor eventData={currentEvent || null}
+                     generalData={{ users: users, clients: clients, services: services }}
+                     updateUserMessage={updateUserMessage}
+                     closeFunc={closeEventEditor} />
+      }
       {/*USER SELECT <label>
         <div>Filter schedule by user</div>
         <select>

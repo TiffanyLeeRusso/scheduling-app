@@ -14,6 +14,7 @@ header {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
 }
 main {
     flex-grow: 1;
@@ -26,10 +27,28 @@ footer {
     padding: 10px;
 }
 
-.error {
-  color: #990033;
+.floatingMessage {
+  position: fixed;
+  top: 20%;
+  right: 40px;
+  padding: 10px 30px;
+  border: 2px solid #777;
+  border-radius: 6px;
+  background: #6f9;
+  z-index: 1000;
+  opacity: 1;
+  transition: all 250ms linear;
+}
+.floatingMessage.hidden {
+  opacity: 0;
+  transition: all 250ms linear 2s;
+  z-index: 0;
+}
+.floatingMessage.error {
+  background: #ff99aa;
 }
 
 .error::before {
   content: "! ";
 }
+

@@ -81,12 +81,11 @@ const EventTemplate = [
   }
 ];
 
-const EventEditor = ({eventData, generalData, closeFunc}) => {
+const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => {
   // Variables
   const [addMode, setAddMode] = useState(true); // TODO: use enum to define modes?
   const [title, setTitle] = useState("Add Event");
   const [formData, setFormData] = useState({});
-  const [error, setError] = useState("");
   const key = useRef(0);
 
   // Functions
@@ -146,9 +145,10 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
     }).then((res) => res.json()
         .then((result) => {
           if(result.status !== "200") {
-            setError("Error: Could not delete appointment.");
+            updateUserMessage("Error: Could not delete appointment.", true);
             console.error(`EventEditor::deleteAppointment got result ${result.status}.`);
           } else {
+            updateUserMessage("Deleted appointment");
             closeFunc();
           }
       })
@@ -166,9 +166,10 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
     }).then((res) => res.json()
         .then((result) => {
           if(result.status !== "200") {
-            setError("Error: Could not add appointment.");
+            updateUserMessage("Error: Could not add appointment.", true);
             console.error(`EventEditor::addAppointment got result ${result.status}.`);
           } else {
+            updateUserMessage("Added appointment");
             closeFunc();
           }
       })
@@ -187,9 +188,10 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
       }).then((res) => res.json()
       .then((result) => {
         if(result.status !== "200") {
-          setError("Error: Could not update appointment.");
+          updateUserMessage("Error: Could not update appointment.", true);
           console.error(`EventEditor::updateAppointment got result ${result.status}.`);
         } else {
+          updateUserMessage("Updated appointment");
           closeFunc();
         }
       })
@@ -254,7 +256,6 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
 
   // Component init
   useEffect(() => {
-    setError("");
     fillForm();
     requestAnimationFrame(() => {
       document.querySelector(".eventEditor")?.scrollIntoView();
@@ -271,11 +272,6 @@ const EventEditor = ({eventData, generalData, closeFunc}) => {
       <form id="eventEditorForm">
         { renderFormFields() }
       </form>
-      { error.length > 0 ? 
-        <div className="error">{error}</div>
-        :
-        null
-      }
       <div className="btn-row">
         { !addMode && <button className="btn btn-primary" onClick={deleteAppointment}>Delete</button> }
         <button className="btn btn-primary" onClick={addMode ? addAppointment : updateAppointment}>Save</button>    
