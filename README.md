@@ -83,6 +83,5 @@ Technical TODOs
 * Add a select to show appointments by user (experience: choose a user, filtering events by user)
 * Add a select to show appointments by client (experience: choose a client, filtering events by client)
 * Add confirmation to delete
-* Add messages for add, edit, delete success
 * Add TypeScript
 * Add Redux

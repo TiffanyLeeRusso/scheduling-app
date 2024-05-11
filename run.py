@@ -21,6 +21,10 @@ mysql = MySQL(app)
 def index():
     return render_template('index.html')
 
+#
+# --- GET ---
+#
+
 def get_table(table):
   cursor = mysql.connection.cursor()
   cursor.execute(
@@ -89,6 +93,10 @@ def get_appointments():
           print("get_appointments error: %s", str(e))
     return { 'status': '500' }
 
+#
+# --- POST ---
+#
+
 @app.route('/appointments', methods=['POST'])
 @cross_origin() # PROD_REMOVE this line
 def add_appointment():
@@ -123,6 +131,10 @@ INSERT INTO appointments (%s) VALUES (%s); ''' % (attrs, values))
         except Exception as e:
           print("add_appointment error: %s", str(e))
     return { 'status': '500' }
+
+#
+# --- PUT ---
+#
 
 @app.route('/appointments', methods=['PUT'])
 @cross_origin() # PROD_REMOVE this line
@@ -163,7 +175,11 @@ DELETE FROM appointment_services WHERE appointment_id=(%s); ''' % appointment_id
         except Exception as e:
           print("update_appointment error: %s", str(e))
     return { 'status': '500' }
-    
+
+#
+# --- DELETE ---
+#
+
 @app.route('/appointments', methods=['DELETE'])
 @cross_origin() # PROD_REMOVE this line
 def delete_appointment():
@@ -183,6 +199,7 @@ DELETE FROM appointments WHERE id=%s; ''' % data["appointment_id"])
       except Exception as e:
         print("delete_appointment error: %s", str(e))
     return { 'status': '500' }
+
 
 # Running app
 if __name__ == '__main__':
