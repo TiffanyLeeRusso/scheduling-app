@@ -81,7 +81,8 @@ Additional-Features Ideas
 
 Technical TODOs
 * Query the DB for appointments for only the current month, not for all time
-* Add hinting for client search
+* Make Client a text input in editor since there can be many clients and we may want to add a new one
+* Add filtering functionality on the BE
 * Add confirmation to delete
 * Add TypeScript
 * Add Redux
