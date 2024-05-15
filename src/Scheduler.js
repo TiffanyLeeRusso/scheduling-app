@@ -7,6 +7,8 @@ import * as bootstrap from '../node_modules/bootstrap/dist/js/bootstrap.esm.min.
 import EventEditor from './EventEditor';
 import './Scheduler.css';
 
+export const CLIENT_DATA_LIST_ID = "clientDataList";
+
 /*
 Definitions:
 Users: Users of this app. Also potentially providers of services.
@@ -17,22 +19,6 @@ AppointmentServices: An n to m link between Appointments and Services,
   listing services for each appointment, since there is a one-to-many 
   relationship between appointments and services. One appointment may
   have more than one service requested/provided.
-
-Additional Features (TODO):
-* Add/edit users
-* Add/edit clients
-* Access control. All users may not require full R/W access to all DB tables. Perhaps not all users provide services; some may just handle appointments. Perhaps there is designated IT/admin user(s).
-* Availability. Each user can update their availability for when they are able to provide services.
-*/
-
-/*
-Technical TODOs
-Add a select to show appointments by user (experience: choose a user, filtering events by user)
-Add a select to show appointments by client (experience: choose a client, filtering events by client)
-Add confirmation to delete
-Add messages for add, edit, delete success
-Add TypeScript?
-Add Redux?
 */
 
 const Scheduler = ({updateUserMessage}) => {
@@ -49,6 +35,7 @@ const Scheduler = ({updateUserMessage}) => {
   const [error, setError] = useState("");
 
   const calendarView = useRef("dayGridMonth"); // dayGridMonth,timeGridWeek,listWeek
+  let keyNum = useRef(0);
   const userFilterRef = useRef(); // reference to the filter inputs
   const clientFilterRef = useRef(); // references to the filter inputs
   
@@ -184,8 +171,17 @@ const Scheduler = ({updateUserMessage}) => {
   // User select
   const renderUserOptions = () => {
     let options = [];
-    users.forEach((option) => 
-      options.push(<option key={option.id} value={option.id}>{option.name}</option>)
+    users.forEach((user) => 
+      options.push(<option key={`user${keyNum++}`} value={user.id}>{user.name}</option>)
+    );
+    return options;
+  };
+
+  // client data list
+  const renderClientDataListOptions = () => {
+    let options = [];
+    clients.forEach((client) => 
+      options.push(<option key={`client${keyNum++}`} value={client.name}/>)
     );
     return options;
   };
@@ -293,7 +289,7 @@ const Scheduler = ({updateUserMessage}) => {
         <div className="filter filterByClient">
           <label>
             <div>Filter schedule by client</div>
-            <input ref={clientFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.CLIENT); }}/>
+            <input ref={clientFilterRef} list={CLIENT_DATA_LIST_ID} onChange={(e) => { filterAppointments(e, FILTER_TYPE.CLIENT); }}/>
           </label>
         </div>
         <button className="btn btn-primary" onClick={clearFilter}>Show all appointments</button>
@@ -310,6 +306,10 @@ const Scheduler = ({updateUserMessage}) => {
         :
         null
       }
+
+      <datalist id={CLIENT_DATA_LIST_ID}>
+        {renderClientDataListOptions()}
+      </datalist>
     </div>
   );
 }
