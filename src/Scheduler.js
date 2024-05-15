@@ -41,15 +41,25 @@ const Scheduler = ({updateUserMessage}) => {
   const [users, setUsers] = useState([]);
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
-  const [appointments, setAppointments] = useState([]);
+  const [appointments, setAppointments] = useState([]); // all appointments
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [appointmentServices, setAppointmentServices] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
   const [error, setError] = useState("");
 
   const calendarView = useRef("dayGridMonth"); // dayGridMonth,timeGridWeek,listWeek
+  const userFilterRef = useRef(); // reference to the filter inputs
+  const clientFilterRef = useRef(); // references to the filter inputs
+  
+  const FILTER_TYPE = {
+    USER: 0,
+    CLIENT: 1
+  };
 
   // Functions
+
+  // Fetch
 
   // fetchData
   // dataType:string The URL for the backend; also used for the error message
@@ -91,17 +101,21 @@ const Scheduler = ({updateUserMessage}) => {
     fetchAppointmentServices();
   }
 
+  // Rendering
+
+  // Calendar
   const renderSchedule = () => {
+    //console.log("users", users); console.log("clients", clients); console.log("appointments", appointments); console.log("filteredAppointments", filteredAppointments); console.log("services", services); console.log("appointmentServices", appointmentServices);
+
     if(appointments.length > 0) {
-      //console.log("users", users); console.log("clients", clients); console.log("appointments", appointments); console.log("services", services); console.log("appointmentServices", appointmentServices);
 
       // Sort appointments by start_time (seems unnecessary when we dump the events into the calendar lib)
-      //appointments.sort((a, b) => { return new Date(a.start_time) - new Date(b.start_time); });
+      //filteredAppointments.sort((a, b) => { return new Date(a.start_time) - new Date(b.start_time); });
 
       // Events array for the FullCalendar calendar
       // Contains objects with props title, start, end, etc.: https://fullcalendar.io/docs/event-parsing
       let events = []; 
-      appointments.forEach((ap) => {
+      filteredAppointments.forEach((ap) => {
         // Find corresponding data from the other arrays
         let client = clients.find((el) => { return el.id === ap.client_id; }) || {};
         let user = users.find((el) => { return el.id === ap.user_id; }) || {};
@@ -166,6 +180,17 @@ const Scheduler = ({updateUserMessage}) => {
       );
     }
   };
+  
+  // User select
+  const renderUserOptions = () => {
+    let options = [];
+    users.forEach((option) => 
+      options.push(<option key={option.id} value={option.id}>{option.name}</option>)
+    );
+    return options;
+  };
+
+  // Add/Edit/Update
 
   const closeEventEditor = () => {
     setShowEditor(false);
@@ -184,23 +209,64 @@ const Scheduler = ({updateUserMessage}) => {
     requestAnimationFrame(() => { setShowEditor(true); });
   };
 
-  /*
-  // USER SELECT
-  const renderUserOptions = () => {
-    let options = [];
-    users.forEach((option) => 
-      options.push(<option key={option.id} value={option.id}>{option.name}</option>)
-    );
-    return options;
+  // Filtering
+
+  // helper func
+  const getClientIdFromName = (name) => {
+    return clients.find((client) => client.name.toLowerCase() === name.toLowerCase())?.id || "";
   };
-  */
+
+  // userId, clientId: string or null to indicate we are not running that filter
+  // aps: the appointment array on which to run the filter(s)
+  const runAllFilters = (userId, clientId, aps) => {
+    let filteredAps = [...aps];
+    if(userId !== null && userId !== "") {
+      filteredAps = aps.filter((ap) => ap.user_id.toString() === userId);
+    }
+    if(clientId !== null && clientId !== "") {
+      filteredAps = aps.filter((ap) => ap.client_id.toString() === clientId);
+    }
+    setFilteredAppointments([...filteredAps]);
+  };
+
+  const filterAppointments = (e, filterType) => { console.log("FILTER", filterType);
+    switch(filterType) {
+      case FILTER_TYPE.USER:
+        runAllFilters(
+          null,
+          getClientIdFromName(clientFilterRef.current.value).toString(),
+          e.target.value.length === 0 ? appointments : [...appointments.filter((ap) => ap.user_id.toString() === e.target.value)]);
+      break;
+
+      case FILTER_TYPE.CLIENT:
+        runAllFilters(
+          userFilterRef.current.value,
+          null, 
+          e.target.value.length === 0 ? appointments : [...appointments.filter((ap) => ap.client_id === getClientIdFromName(e.target.value))]);
+      break;
+    }
+  };
+
+  const clearFilter = (e) => {
+    userFilterRef.current.value = "";
+    clientFilterRef.current.value = "";
+    setFilteredAppointments([...appointments]);
+  };
 
   // Component init
   useEffect(() => {
     setError("");
     fetchAll();
-    renderSchedule();
   }, []);
+
+  // appointments should update once on init
+  useEffect(() => {
+    clearFilter();
+  }, [appointments]);
+  
+  useEffect(() => {
+    renderSchedule();
+  }, [filteredAppointments]);
 
   // HTML
   return (
@@ -212,12 +278,27 @@ const Scheduler = ({updateUserMessage}) => {
                      updateUserMessage={updateUserMessage}
                      closeFunc={closeEventEditor} />
       }
-      {/*USER SELECT <label>
-        <div>Filter schedule by user</div>
-        <select>
-        {renderUserOptions()}
-        </select>
-      </label>*/}
+
+      <fieldset className="scheduleFilters">
+        <legend>Appointment Filters</legend>
+        <div className="filter filterByUser">
+          <label>
+            <div>Filter schedule by user</div>
+            <select ref={userFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.USER); }}>
+              <option></option>
+              {renderUserOptions()}
+            </select>
+          </label>
+        </div>
+        <div className="filter filterByClient">
+          <label>
+            <div>Filter schedule by client</div>
+            <input ref={clientFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.CLIENT); }}/>
+          </label>
+        </div>
+        <button className="btn btn-primary" onClick={clearFilter}>Show all appointments</button>
+      </fieldset>
+
       <div id="calendar"></div>
       { renderSchedule() }
       { error.length > 0 ? 
