@@ -80,8 +80,8 @@ Additional-Features Ideas
 * Availability. Each user can update their availability for when they are able to provide services. Need a new DB table for user availability.
 
 Technical TODOs
-* Add a select to show appointments by user (experience: choose a user, filtering events by user)
-* Add a select to show appointments by client (experience: choose a client, filtering events by client)
+* Query the DB for appointments for only the current month, not for all time
+* Add hinting for client search
 * Add confirmation to delete
 * Add TypeScript
 * Add Redux
