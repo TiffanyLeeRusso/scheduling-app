@@ -35,7 +35,7 @@ const Scheduler = ({updateUserMessage}) => {
   const [error, setError] = useState("");
 
   const calendarView = useRef("dayGridMonth"); // dayGridMonth,timeGridWeek,listWeek
-  let keyNum = useRef(0);
+  const keyNum = useRef(0);
   const userFilterRef = useRef(); // reference to the filter inputs
   const clientFilterRef = useRef(); // references to the filter inputs
   
@@ -172,7 +172,7 @@ const Scheduler = ({updateUserMessage}) => {
   const renderUserOptions = () => {
     let options = [];
     users.forEach((user) => 
-      options.push(<option key={`user${keyNum++}`} value={user.id}>{user.name}</option>)
+      options.push(<option key={`user${keyNum.current++}`} value={user.id}>{user.name}</option>)
     );
     return options;
   };
@@ -181,7 +181,7 @@ const Scheduler = ({updateUserMessage}) => {
   const renderClientDataListOptions = () => {
     let options = [];
     clients.forEach((client) => 
-      options.push(<option key={`client${keyNum++}`} value={client.name}/>)
+      options.push(<option key={`client${keyNum.current++}`} value={client.name}/>)
     );
     return options;
   };

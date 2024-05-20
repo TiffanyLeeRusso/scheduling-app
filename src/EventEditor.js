@@ -86,7 +86,7 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
   const [addMode, setAddMode] = useState(true); // TODO: use enum to define modes?
   const [title, setTitle] = useState("Add Event");
   const [formData, setFormData] = useState({});
-  const key = useRef(0);
+  const keyNum = useRef(0);
 
   // Functions
   const fillForm = () => {
@@ -234,7 +234,7 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
           <div className="label">{field.label}</div>
           <select name={field.name} value={formData[field.name]} onChange={handleSelectChange} {...props}>
             {field.skipEmptyVal ? null : <option></option>}
-            { sortedOptions.map((data) => <option value={data.id} key={`${field.name}${(key.current)++}`}>{data.name}</option>) }
+            { sortedOptions.map((data) => <option value={data.id} key={`${field.name}${keyNum.current++}`}>{data.name}</option>) }
           </select>
         </label>
         );
