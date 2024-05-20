@@ -10,9 +10,9 @@ INSERT INTO clients (name, contact_phone) VALUES ("Verdant Kerry", "302-555-1234
 INSERT INTO clients (name) VALUES ("Three");
 
 -- Services
-INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Checkup", "Routine checkup", 100, 120, 30);
-INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Blood Draw", "", 130, 25, 15);
-INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Blood Test (Basic)", "", 131, 50, 0);
+INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Wash", "Routine checkup", 100, 120, 30);
+INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Dry", "", 130, 25, 15);
+INSERT INTO services (name, description, billing_code, base_price, duration) VALUES ("Wash & dry", "", 131, 50, 0);
 
 -- Appointments
 INSERT INTO appointments (start_time, end_time, price_charged, notes, client_id, user_id) VALUES ("2024-04-19 10:00:00", "2024-04-19 10:30:00", 150, "Friends&fam discount", 1, 1);
