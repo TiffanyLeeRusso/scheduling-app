@@ -7,11 +7,13 @@ import './EventEditor.css';
 // fields change.
 // Each object must have:
 //   label:string Displayed as the field label the user sees.
-//   name:string Form-field name
+//   name:string Form-field name. Should be unique.
 //   fieldType:string Type of field displayed
 //        (["text"|"select"|"date"|"time"|"textarea"])
 //   data:string If the fieldType is "select", the dropdown is
 //        populated with data from this property.
+//   dataList:string If the fieldType is "text", this is the ID of the
+//        datalist element to use for hinting.
 //   skipEmptyVal:boolean If fieldType is "select", the dropdown is
 //        populated first with an empty option. Do not render an empty
 //        option if this val is true.
@@ -96,7 +98,11 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
       setAddMode(true);
       setTitle("Add Event");
       for(let field of EventTemplate) {
-        initFormData[field.name] = "";
+        if(field.fieldType === "select" && field.props?.multiple) {
+          initFormData[field.name] = [];
+        } else {
+          initFormData[field.name] = "";
+        }
       }
 
     } else {
@@ -202,7 +208,7 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
     const { name, value } = e.target;
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
   };
-  
+
   const handleSelectChange = (e) => {
     let options = e.target.options;
     let value = [];
@@ -211,7 +217,7 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
         value.push(options[i].value);
       }
     }
-    if(value.length === 1) { value = value[0]; }
+    if(value.length === 1) { value = [value[0]]; }
     const { name } = e.target;
     setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));    
   };
@@ -222,17 +228,17 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
 
     switch(field.fieldType) {
       case "text":
-      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="text" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={field.name}><div className="label">{field.label}</div><input type="text" name={field.name} value={formData[field.name]} list={field.dataList} onChange={handleChange} {...props} /></label>;
 
       case "textarea":
-      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><textarea name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={field.name}><div className="label">{field.label}</div><textarea name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
 
       case "select":
       let sortedOptions = generalData[field.data].sort((a, b) => { return a.name > b.name; });
       return (
-        <label key={`${field.name}_label_${keyNum.current++}`}>
+        <label key={field.name}>
           <div className="label">{field.label}</div>
-          <select name={field.name} value={formData[field.name]} onChange={handleSelectChange} {...props}>
+          <select name={field.name} value={formData[field.name]} onChange={props?.multiple ? handleSelectChange : handleChange} {...props}>
             {field.skipEmptyVal ? null : <option key={`${field.name}_empty_${keyNum.current++}`}></option>}
             { sortedOptions.map((data) => <option value={data.id} key={`${field.name}_${data.name}_${keyNum.current++}`}>{data.name}</option>) }
           </select>
@@ -240,15 +246,18 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
         );
 
       case "date":
-      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="date" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={field.name}><div className="label">{field.label}</div><input type="date" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
 
       case "time":
-      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="time" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={field.name}><div className="label">{field.label}</div><input type="time" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
     };
   };
 
-
   const renderFormFields = () => {
+    // If the formData is not init'd yet, wait until next render.
+    // Maybe the first renderFormFields should somehow go in a hook once formData is init'd
+    // but for now we are calling this func from the HTML so just do this check.
+    if(Object.keys(formData).length === 0) { return; }
     let fields = [];
     EventTemplate.forEach(field => fields.push(renderField(field)));
     return fields;
