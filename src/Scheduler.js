@@ -135,7 +135,7 @@ const Scheduler = ({updateUserMessage}) => {
             editable: true
         });
       });
-      
+
       // FullCalendar.io calendar init
       let calendarEl = document.getElementById('calendar');
       let calendar = new Calendar(calendarEl, {
@@ -152,7 +152,7 @@ const Scheduler = ({updateUserMessage}) => {
           calendarView.current = dateInfo.view.type;
         },
         eventDidMount: (info) => {
-          let tooltip = new bootstrap.Tooltip(info.el.parentElement, {
+          let tooltip = new bootstrap.Tooltip(info.el, {
             title: info.event.extendedProps.description,
             placement: 'top',
             trigger: 'hover',

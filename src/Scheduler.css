@@ -10,3 +10,7 @@
 .scheduleFilters {
   margin-bottom: 20px;
 }
+
+.fc-list-event {
+  cursor: pointer;
+}
