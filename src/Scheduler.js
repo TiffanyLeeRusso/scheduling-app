@@ -248,7 +248,7 @@ const Scheduler = ({updateUserMessage}) => {
     setFilteredAppointments([...filteredAps]);
   };
 
-  const filterAppointments = (e, filterType) => { console.log("FILTER", filterType);
+  const filterAppointments = (e, filterType) => {
     switch(filterType) {
       case FILTER_TYPE.USER:
         runAllFilters(
