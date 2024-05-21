@@ -38,6 +38,10 @@ const Scheduler = ({updateUserMessage}) => {
   const keyNum = useRef(0);
   const userFilterRef = useRef(); // reference to the filter inputs
   const clientFilterRef = useRef(); // references to the filter inputs
+  // We define a tooltip delay so we can know how long to wait for the
+  // tooltip to hide before updating the view for the editor.
+  // If we do not wait for the tooltip to hide it will stay shown.
+  const tooltipDelay = 0; // ms
   
   const FILTER_TYPE = {
     USER: 0,
@@ -118,18 +122,20 @@ const Scheduler = ({updateUserMessage}) => {
 
         let description = `<div>Client: ${client.name}</div><div>User: ${user.name}</div><div>Reason: ${serviceNames.join(', ')}</div>`;
         // The event object here is what we pass to EventEditor
-        let event = { appointment: ap, client: client, user: user, services: serviceList }
+        let event = { appointment: ap, client: client, user: user, services: serviceList };
 
         events.push({
             title: client.name,
-            extendedProps: {description: description, event: event},
+            extendedProps: {description: description, event: event,
+                            tooltip: { popover: {} } // Obj in obj to so we can assign a value once we have the event element
+                           },
             start: new Date(ap.start_time),
             end: new Date(ap.end_time),
             interactive: true,
             editable: true
         });
       });
-
+      
       // FullCalendar.io calendar init
       let calendarEl = document.getElementById('calendar');
       let calendar = new Calendar(calendarEl, {
@@ -145,17 +151,34 @@ const Scheduler = ({updateUserMessage}) => {
           // Save the current view for the next rerender
           calendarView.current = dateInfo.view.type;
         },
-        /* Tooltip does not disappear on event click so it is disabled for now
         eventDidMount: (info) => {
-          let tooltip = new bootstrap.Tooltip(info.el, {
+          let tooltip = new bootstrap.Tooltip(info.el.parentElement, {
             title: info.event.extendedProps.description,
             placement: 'top',
             trigger: 'hover',
             container: 'body',
             html: true
           });
-        },/**/
-        eventClick: editEvent,
+          info.event.extendedProps.tooltip.popover = tooltip
+        },
+        eventClick: (info) => {
+          // Manually disable (in case the mouse is still on the event)
+          // & hide all (in case the mouse moves to a near tooltip)
+          // the tooltips or else they will stay shown
+          events.forEach((event) => {
+            if(event.extendedProps.tooltip.popover.disable) {
+              event.extendedProps.tooltip.popover.disable();
+              event.extendedProps.tooltip.popover.hide();
+            }
+          });
+          editEvent(info);
+          // Re-enable the tooltips.
+          events.forEach((event) => {
+            if(event.extendedProps.tooltip.popover.enable) {
+              event.extendedProps.tooltip.popover.enable();
+            }
+          });
+        },
         events: events
       });
 
@@ -167,7 +190,7 @@ const Scheduler = ({updateUserMessage}) => {
       );
     }
   };
-  
+
   // User select
   const renderUserOptions = () => {
     let options = [];

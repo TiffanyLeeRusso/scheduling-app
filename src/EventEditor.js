@@ -222,28 +222,28 @@ const EventEditor = ({eventData, generalData, updateUserMessage, closeFunc}) => 
 
     switch(field.fieldType) {
       case "text":
-      return <label><div className="label">{field.label}</div><input type="text" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="text" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
 
       case "textarea":
-      return <label><div className="label">{field.label}</div><textarea name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><textarea name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
 
       case "select":
       let sortedOptions = generalData[field.data].sort((a, b) => { return a.name > b.name; });
       return (
-        <label>
+        <label key={`${field.name}_label_${keyNum.current++}`}>
           <div className="label">{field.label}</div>
           <select name={field.name} value={formData[field.name]} onChange={handleSelectChange} {...props}>
-            {field.skipEmptyVal ? null : <option></option>}
-            { sortedOptions.map((data) => <option value={data.id} key={`${field.name}${keyNum.current++}`}>{data.name}</option>) }
+            {field.skipEmptyVal ? null : <option key={`${field.name}_empty_${keyNum.current++}`}></option>}
+            { sortedOptions.map((data) => <option value={data.id} key={`${field.name}_${data.name}_${keyNum.current++}`}>{data.name}</option>) }
           </select>
         </label>
         );
 
       case "date":
-      return <label><div className="label">{field.label}</div><input type="date" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="date" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
 
       case "time":
-      return <label><div className="label">{field.label}</div><input type="time" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
+      return <label key={`${field.name}_label_${keyNum.current++}`}><div className="label">{field.label}</div><input type="time" name={field.name} value={formData[field.name]} onChange={handleChange} {...props} /></label>;
     };
   };
 
