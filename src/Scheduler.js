@@ -5,6 +5,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import * as bootstrap from '../node_modules/bootstrap/dist/js/bootstrap.esm.min.js'
 import EventEditor from './EventEditor';
+import ClientEditor from './ClientEditor';
+import { getClientIdFromName, getClientFromName } from './utils.js';
 import './Scheduler.css';
 
 export const CLIENT_DATA_LIST_ID = "clientDataList";
@@ -31,18 +33,24 @@ const Scheduler = ({updateUserMessage}) => {
   const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [appointmentServices, setAppointmentServices] = useState([]);
   const [currentEvent, setCurrentEvent] = useState(null);
+  const [currentClient, setCurrentClient] = useState(null);
   const [showEditor, setShowEditor] = useState(false);
+  const [itemEdit, setItemEdit] = useState({});
+  const [filtersShown, setFiltersShown] = useState(false);
+  const [clientSearchShown, setClientSearchShown] = useState(false);
   const [error, setError] = useState("");
 
   const calendarView = useRef("dayGridMonth"); // dayGridMonth,timeGridWeek,listWeek
   const keyNum = useRef(0);
   const userFilterRef = useRef(); // reference to the filter inputs
   const clientFilterRef = useRef(); // references to the filter inputs
-  // We define a tooltip delay so we can know how long to wait for the
-  // tooltip to hide before updating the view for the editor.
-  // If we do not wait for the tooltip to hide it will stay shown.
-  const tooltipDelay = 0; // ms
-  
+  const clientSearchRef = useRef();
+
+  const ITEM_TYPE = {
+    EVENT: 0,
+    CLIENT: 1
+  };
+
   const FILTER_TYPE = {
     USER: 0,
     CLIENT: 1
@@ -211,29 +219,33 @@ const Scheduler = ({updateUserMessage}) => {
 
   // Add/Edit/Update
 
-  const closeEventEditor = () => {
+  const closeEditor = () => {
     setShowEditor(false);
     fetchAll();
   }
 
-  const addEvent = () => {
+  const addItem = (itemType) => {
     setShowEditor(false); // Make sure EventEditor refreshes in case it is already open
+    setItemEdit(itemType);
     setCurrentEvent(null);
     requestAnimationFrame(() => { setShowEditor(true); });
   };
 
   const editEvent = (e) => {
-    setShowEditor(false); // Make sure EventEditor refreshes in case it is already open
+    setShowEditor(false); // Make sure the editor refreshes in case it is already open
+    setItemEdit(ITEM_TYPE.EVENT);
     setCurrentEvent(e.event.extendedProps.event);
     requestAnimationFrame(() => { setShowEditor(true); });
   };
 
-  // Filtering
-
-  // helper func
-  const getClientIdFromName = (name) => {
-    return clients.find((client) => client.name.toLowerCase() === name.toLowerCase())?.id || "";
+  const editClient = (e) => {
+    setShowEditor(false); // Make sure the editor refreshes in case it is already open
+    setItemEdit(ITEM_TYPE.CLIENT);
+    setCurrentClient(getClientFromName(clientSearchRef.current.value, clients));
+    requestAnimationFrame(() => { setShowEditor(true); });
   };
+
+  // Filtering
 
   // userId, clientId: string or null to indicate we are not running that filter
   // aps: the appointment array on which to run the filter(s)
@@ -253,7 +265,7 @@ const Scheduler = ({updateUserMessage}) => {
       case FILTER_TYPE.USER:
         runAllFilters(
           null,
-          getClientIdFromName(clientFilterRef.current.value).toString(),
+          getClientIdFromName(clientFilterRef.current.value, clients).toString(),
           e.target.value.length === 0 ? appointments : [...appointments.filter((ap) => ap.user_id.toString() === e.target.value)]);
       break;
 
@@ -261,7 +273,7 @@ const Scheduler = ({updateUserMessage}) => {
         runAllFilters(
           userFilterRef.current.value,
           null, 
-          e.target.value.length === 0 ? appointments : [...appointments.filter((ap) => ap.client_id === getClientIdFromName(e.target.value))]);
+          e.target.value.length === 0 ? appointments : [...appointments.filter((ap) => ap.client_id === getClientIdFromName(e.target.value, clients))]);
       break;
     }
   };
@@ -290,32 +302,53 @@ const Scheduler = ({updateUserMessage}) => {
   // HTML
   return (
     <div className="scheduling">
-      <button className="btn btn-primary add-btn" onClick={addEvent}>Add Event</button>
-      { showEditor && 
+      <button className="btn btn-primary add-btn add-event-btn" onClick={()=>{addItem(ITEM_TYPE.EVENT);}}>Add Event</button>
+      <button className="btn btn-primary add-btn add-client-btn" onClick={()=>{addItem(ITEM_TYPE.CLIENT);}}>Add Client</button>
+      { showEditor && (itemEdit === ITEM_TYPE.EVENT ?
         <EventEditor eventData={currentEvent || null}
                      generalData={{ users: users, clients: clients, services: services }}
                      updateUserMessage={updateUserMessage}
-                     closeFunc={closeEventEditor} />
+                     closeFunc={closeEditor} />
+        :
+        <ClientEditor clientData={currentClient}
+                      updateUserMessage={updateUserMessage}
+                      closeFunc={closeEditor}/>
+        )
       }
 
-      <fieldset className="scheduleFilters">
-        <legend>Appointment Filters</legend>
-        <div className="filter filterByUser">
-          <label>
-            <div>Filter schedule by user</div>
-            <select ref={userFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.USER); }}>
-              <option></option>
-              {renderUserOptions()}
-            </select>
-          </label>
+      <fieldset className="clientSearch accordion">
+        <legend><button className="clientSearchToggle accordionToggle" onClick={()=>{setClientSearchShown(!clientSearchShown)}}>{clientSearchShown ? "- Client Search" : "+ Client Search"}</button></legend>
+        <div className={`clientSearch accordionArea ${clientSearchShown ? "" : "hidden"} `}>
+          <div className="search searchClient">
+            <label>
+              <div>Client name</div>
+              <input ref={clientSearchRef} list={CLIENT_DATA_LIST_ID}/>
+            </label>
+            <button className="btn btn-primary" onClick={editClient}>Edit Client</button>
+          </div>
         </div>
-        <div className="filter filterByClient">
-          <label>
-            <div>Filter schedule by client</div>
-            <input ref={clientFilterRef} list={CLIENT_DATA_LIST_ID} onChange={(e) => { filterAppointments(e, FILTER_TYPE.CLIENT); }}/>
-          </label>
+      </fieldset>
+
+      <fieldset className="scheduleFilters accordion">
+        <legend><button className="eventFilterToggle accordionToggle" onClick={()=>{setFiltersShown(!filtersShown)}}>{filtersShown ? "- Event Filters" : "+ Event Filters"}</button></legend>
+        <div className={`eventFilters accordionArea ${filtersShown ? "" : "hidden"} `}>
+          <div className="filter filterByUser">
+            <label>
+              <div>Filter schedule by user</div>
+              <select ref={userFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.USER); }}>
+                <option></option>
+                {renderUserOptions()}
+              </select>
+            </label>
+          </div>
+          <div className="filter filterByClient">
+            <label>
+              <div>Filter schedule by client</div>
+              <input ref={clientFilterRef} list={CLIENT_DATA_LIST_ID} onChange={(e) => { filterAppointments(e, FILTER_TYPE.CLIENT); }}/>
+            </label>
+          </div>
+          <button className="btn btn-primary" onClick={clearFilter}>Show all events</button>
         </div>
-        <button className="btn btn-primary" onClick={clearFilter}>Show all appointments</button>
       </fieldset>
 
       <div id="calendar"></div>
