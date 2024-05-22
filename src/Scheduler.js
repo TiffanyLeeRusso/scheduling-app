@@ -37,6 +37,7 @@ const Scheduler = ({updateUserMessage}) => {
   const [showEditor, setShowEditor] = useState(false);
   const [itemEdit, setItemEdit] = useState({});
   const [filtersShown, setFiltersShown] = useState(false);
+  const [userFilter, setUserFilter] = useState("");
   const [clientSearchShown, setClientSearchShown] = useState(false);
   const [error, setError] = useState("");
 
@@ -335,7 +336,7 @@ const Scheduler = ({updateUserMessage}) => {
           <div className="filter filterByUser">
             <label>
               <div>Filter schedule by user</div>
-              <select ref={userFilterRef} onChange={(e) => { filterAppointments(e, FILTER_TYPE.USER); }}>
+              <select ref={userFilterRef} value={userFilter} onChange={(e) => { setUserFilter(e.target.value); filterAppointments(e, FILTER_TYPE.USER); }}>
                 <option></option>
                 {renderUserOptions()}
               </select>
