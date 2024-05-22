@@ -24,7 +24,7 @@ const Editor = ({itemName, formTemplate, data, generalData, callbacks}) => {
   // Functions
   const fillForm = () => {
     let initFormData = {};
-console.log(data, formTemplate)
+
     if(data === null) {
       setAddMode(true);
       setTitle(`Add ${itemName}`);
