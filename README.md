@@ -75,7 +75,6 @@ What kind of side project doesn't have TODOs?
 
 Additional-Features Ideas
 * Add/edit users
-* Add/edit clients
 * Access control. All users may not require full R/W access to all DB tables. Perhaps not all users provide services; some may just handle appointments. Perhaps there is designated IT/admin user(s).
 * Availability. Each user can update their availability for when they are able to provide services. Need a new DB table for user availability.
 
