@@ -132,6 +132,31 @@ INSERT INTO appointments (%s) VALUES (%s); ''' % (attrs, values))
           print("add_appointment error: %s", str(e))
     return { 'status': '500' }
 
+@app.route('/clients', methods=['POST'])
+@cross_origin() # PROD_REMOVE this line
+def add_client():
+    if request.method == 'POST':
+        data = request.get_json()
+        try:
+          attrs = []
+          values = []
+          for (attribute, value) in data.items():
+            attrs.append(attribute)
+            values.append("\"" + value + "\"")
+          attrs = ', '.join(attrs)
+          values = ', '.join(values)
+
+          # insert the row into the appointments table
+          cursor = mysql.connection.cursor()
+          cursor.execute(
+            ''' 
+INSERT INTO clients (%s) VALUES (%s); ''' % (attrs, values))
+          mysql.connection.commit()
+          return { 'status': '200' }
+        except Exception as e:
+          print("add_client error: %s", str(e))
+    return { 'status': '500' }
+
 #
 # --- PUT ---
 #
@@ -176,6 +201,35 @@ DELETE FROM appointment_services WHERE appointment_id=(%s); ''' % appointment_id
           print("update_appointment error: %s", str(e))
     return { 'status': '500' }
 
+
+@app.route('/clients', methods=['PUT'])
+@cross_origin() # PROD_REMOVE this line
+def update_client():
+    if request.method == 'PUT':
+        try:
+          data = request.get_json()
+
+          client_id = data["client_id"]
+          del data["client_id"]
+
+          colVals = []
+          for (attribute, value) in data.items():
+            colVals.append(attribute + "=" + "\"" + str(value) + "\"")
+          colVals = ', '.join(colVals)
+
+          cursor = mysql.connection.cursor()
+
+          # update the row in the appointments table
+          cursor.execute(
+            ''' 
+UPDATE clients SET %s WHERE id=%s; ''' % (colVals, client_id))
+
+          mysql.connection.commit()
+          return { 'status': '200' }
+        except Exception as e:
+          print("update_client error: %s", str(e))
+    return { 'status': '500' }
+
 #
 # --- DELETE ---
 #
@@ -198,6 +252,23 @@ DELETE FROM appointments WHERE id=%s; ''' % data["appointment_id"])
           return { 'status': '200' }
       except Exception as e:
         print("delete_appointment error: %s", str(e))
+    return { 'status': '500' }
+
+@app.route('/clients', methods=['DELETE'])
+@cross_origin() # PROD_REMOVE this line
+def delete_client():
+    if request.method == 'DELETE':
+      try:
+          data = request.get_json()
+          cursor = mysql.connection.cursor()
+          cursor.execute(
+            ''' 
+DELETE FROM clients WHERE id=%s; ''' % data["client_id"])
+          
+          mysql.connection.commit()
+          return { 'status': '200' }
+      except Exception as e:
+        print("delete_client error: %s", str(e))
     return { 'status': '500' }
 
 
